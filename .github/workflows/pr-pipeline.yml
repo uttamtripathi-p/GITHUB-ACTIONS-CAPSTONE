@@ -15,6 +15,6 @@ jobs:
     steps:
       - name: pr checks
         run: |
-          echo "PR checks passed for branch: ${{ github.ref }}
+          echo "PR checks passed for branch: ${{ github.ref }}"
 
 
