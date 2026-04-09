@@ -40,8 +40,8 @@ jobs:
           echo "Deploying image: ghcr.io/${GITHUB_REPOSITORY}:${{ needs.prep.outputs.short_sha }} to production"
       - name: environment info
         run: |
-          echo "The environment being used is : ${{ vars.SITE }}"  
-
-    
-
+          echo "The environment being used is : ${{ vars.SITE }}"
+      - name: success message
+        if: success()
+        run: echo "SUCCESSFULL"
 
