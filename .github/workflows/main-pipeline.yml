@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/reusable-docker.yml
     needs: prep
     with:
-      image_name: ${{ github.repository }}
+      image_name: ${{ secrets.DOCKER_USERNAME }}
       tag: ${{ needs.prep.outputs.short_sha }}
     secrets:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
