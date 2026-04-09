@@ -1,8 +1,8 @@
 name: main branch pipeline
+
 on:
   push:
     branches: [master]
-
 
 jobs:
   build-test:
@@ -10,15 +10,13 @@ jobs:
     with:
       run_tests: true
 
-
   prep:
     runs-on: ubuntu-latest
     outputs:
       short_sha: ${{ steps.vars.outputs.short_sha }}
     steps:
       - id: vars
-        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-
+        run: echo "short_sha=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
   build-push:
     uses: ./.github/workflows/reusable-docker.yml
@@ -29,17 +27,17 @@ jobs:
     secrets:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
       docker_token: ${{ secrets.DOCKER_TOKEN }}
-    run: |
-      echo "${{ outputs.test-result }}"
-  deploy: 
+
+  deploy:
     runs-on: ubuntu-latest
     needs: [build-push, prep]
-    environment: environment
+    environment: production
     steps:
       - name: deploy message
-        run: |  
-          echo "Deploying image: ghcr.io/${GITHUB_REPOSITORY}:${{ needs.prep.outputs.short_sha }} to production"
-          echo "The environment being used is : ${{ vars.SITE }}"
+        run: |
+          echo "Deploying image: ghcr.io/${GITHUB_REPOSITORY}:${{ needs.prep.outputs.short_sha }}"
+          echo "Environment: ${{ vars.SITE }}"
+
       - name: success message
         if: success()
-        run: echo "SUCCESSFULL"
+        run: echo "SUCCESSFUL"
