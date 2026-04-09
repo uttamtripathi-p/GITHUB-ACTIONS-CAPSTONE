@@ -1,0 +1,51 @@
+name: reusable worfklow build & test
+on:
+  workflow_call:
+    inputs:
+      python_version:
+        description: "python version to use"
+        default: "3.13"
+        required: false
+        type: string
+      run_tests: 
+        description: "Tests to run"
+        type: boolean
+        default: true
+        required: false
+    outputs:
+      test-result:
+        description: "Test value passed or failed"
+        value: ${{ jobs.build-and-test.outputs.test_result }}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    outputs:
+      test_result: ${{ steps.set_result.outputs.test_result }}
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v4
+      - name: setup language runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python_version }}
+      - name: installing dependencies
+        run: |
+          pip install -r requirements.txt 
+          pip install -r requirements-cicd.txt
+      - name: run tests
+        id: run_tests 
+        if: ${{ inputs.run_tests }}
+        run: |
+          flake8 app.py
+      - name: set output
+        id: set_result
+        if: always()
+        run: |
+          if [[ "${{ steps.run_tests.outcome }}" == "success" || "${{ steps.run_tests.outcome }}" == "skipped" ]]; then
+            echo "test_result=passed" >> $GITHUB_OUTPUT
+          else
+            echo "test_result=failed" >> $GITHUB_OUTPUT
+          fi
+
+
