@@ -1,4 +1,4 @@
-name: pull request pipeline
+name: pull requests pipeline
 on: 
   pull_request:
     branches: [main]
