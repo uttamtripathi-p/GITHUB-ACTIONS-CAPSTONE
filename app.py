@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template_string
+from flask import Flask, request, render_template_string
 import mysql.connector
 import os
 
@@ -34,9 +34,18 @@ HTML = '''
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .header h1 { font-size: 22px; color: white; }
-        .header p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
-        .container { max-width: 580px; margin: 40px auto; padding: 0 20px; width: 100%; }
+       .header h1 { font-size: 22px; color: white; }
+        .header p {
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+        margin-top: 4px;
+        }
+        .container {
+            max-width: 580px;
+            margin: 40px auto;
+            padding: 0 20px;
+            width: 100%;
+        }
         .glass {
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(20px);
@@ -45,7 +54,13 @@ HTML = '''
             padding: 24px;
             margin-bottom: 20px;
         }
-        .glass h2 { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        .glass h2 {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
         input[type="text"] {
             width: 100%;
             padding: 12px 16px;
@@ -94,19 +109,26 @@ HTML = '''
             border-radius: 20px;
             margin-left: 8px;
         }
-        .empty { color: rgba(255,255,255,0.3); font-size: 14px; text-align: center; padding: 20px; }
+        .empty {
+            color: rgba(255,255,255,0.3);
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>&#x1F433; Dockerized Flask Todo</h1>
-        <p>by Uttam Tripathi &nbsp;&bull;&nbsp; Flask + MySQL + Docker Compose</p>
+        <p>by Uttam Tripathi &nbsp;&bull;&nbsp;
+        Flask + MySQL + Docker Compose</p>
     </div>
     <div class="container">
         <div class="glass">
             <h2>New Todo</h2>
             <form method="POST" action="/todos">
-                <input type="text" name="task" placeholder="What needs to be done?" required>
+                <input type="text" name="task"
+                placeholder="What needs to be done?" required>
                 <button type="submit">+ Add Todo</button>
             </form>
         </div>
