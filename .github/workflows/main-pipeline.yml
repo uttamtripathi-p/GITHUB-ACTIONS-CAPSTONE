@@ -1,7 +1,7 @@
 name: main branch pipeline
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 
 jobs:
