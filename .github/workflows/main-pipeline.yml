@@ -28,7 +28,7 @@ jobs:
       tag: ${{ needs.prep.outputs.short_sha }}
     secrets:
       docker_username: ${{ secrets.docker_username }}
-      docker_token: ${{ secrets.docker_username }}
+      docker_token: ${{ secrets.docker_token }}
 
   deploy: 
     runs-on: ubuntu-latest
