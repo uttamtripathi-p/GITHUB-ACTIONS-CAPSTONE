@@ -14,6 +14,11 @@ def get_db():
     )
 
 
+@app.route('/health')
+def health():
+    return {"status": "healthy"}, 200
+
+
 HTML = '''
 <!DOCTYPE html>
 <html>

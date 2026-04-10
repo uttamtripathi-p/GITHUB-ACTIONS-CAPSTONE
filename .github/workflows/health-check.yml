@@ -23,7 +23,7 @@ jobs:
       - name: healthcheck after waiting 5 seconds
         run: |
           sleep 5
-          if curl -s http://localhost:5000/health; then
+          if curl -sf http://localhost:5000/health; then
             echo "Health check passed"
           else
             echo "Health check failed"
