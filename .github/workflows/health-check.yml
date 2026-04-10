@@ -1,0 +1,44 @@
+name: health check
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 */12 * * *'
+         
+
+jobs:
+    pull_image:
+        runs-on: ubuntu-latest
+        outputs:
+            health_check_result: ${{ steps.summary.outputs.github_output}}
+        steps:
+            - name: pull image
+              run: |
+                docker pull ${{ secrets.docker_username }}/github-actions-capstone:latest
+            - name: run container
+              run: |
+                docker rm -f health_check_container || true
+                docker run -d -p 5000:5000 --name health_check_container ${{ secrets.docker_username }}/github-actions-capstone:latest
+            - name: healthcheck after waiting 5 seconds
+              run: |
+                sleep 5
+                if curl -s http://localhost:5000/health; then
+                    echo "Health check passed"
+                else
+                    echo "Health check failed"
+                    exit 1
+                fi
+
+            - name: cleamup
+              run: | 
+                docker rm health_check_container || true
+
+            - name: summary step
+              id: summary
+              run: |
+                echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
+                echo "- Image: ${{ secrets.docker_username }}/github-actions-capstone:latest" >> $GITHUB_STEP_SUMMARY
+                echo "- Status: PASSED" >> $GITHUB_STEP_SUMMARY
+                echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
+                github_output="Health check completed successfully at $(date)"
+                echo "github_output=$github_output" >> $GITHUB_OUTPUT
+                        
