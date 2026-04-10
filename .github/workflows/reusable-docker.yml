@@ -37,12 +37,18 @@ jobs:
         with:
           username: ${{ secrets.docker_username }}
           password: ${{ secrets.docker_token }} 
+      # Step 1 — transform (shell can do string manipulation)
+      - name: set lowercase image name
+        id: image
+        run: |
+          echo "name=$(echo '${{ inputs.image_name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+# Step 2 — use the transformed value
       - name: build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
-          push: true
-          tags: ${{ secrets.docker_username }}/github-actions-capstone:${{ inputs.tag }}
+          tags: |
+            ${{ secrets.docker_username }}/${{ steps.image.outputs.name }}:latest
       - name: image url output
         id: image_url
         if: success()

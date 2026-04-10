@@ -20,9 +20,9 @@ jobs:
 
   build-push:
     uses: ./.github/workflows/reusable-docker.yml
-    needs: prep
+    needs: [ prep,build-test ]
     with:
-      image_name: ${{ github.repository }}
+      image_name: ${{ github.event.repository.name }}
       tag: ${{ needs.prep.outputs.short_sha }}
     secrets:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: deploy message
         run: |  
-          echo "Deploying image: ghcr.io/${GITHUB_REPOSITORY}:${{ needs.prep.outputs.short_sha }} to production"
+          echo "Deploying image: ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:${{ needs.prep.outputs.short_sha }}"
       - name: environment info
         run: |
           echo "The environment being used is : ${{ vars.SITE }}"
