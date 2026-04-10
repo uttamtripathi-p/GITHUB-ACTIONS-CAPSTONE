@@ -1,50 +1,51 @@
 name: health check
 on:
-    workflow_dispatch:
-    schedule:
-        - cron: '0 */12 * * *'
-         
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
 
 jobs:
-    pull_image:
-        runs-on: ubuntu-latest
-        outputs:
-            health_check_result: ${{ steps.summary.outputs.github_output}}
-        steps:
-            - name: pull image
-              run: |
-                docker pull ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest
-            - name: run container
-              run: |
-                docker rm -f health_check_container || true
-                docker run -d -p 5000:5000 --name health_check_container ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest
-            - name: healthcheck after waiting 5 seconds
-              run: |
-                sleep 5
-                if curl -s http://localhost:5000/health; then
-                    echo "Health check passed"
-                else
-                    echo "Health check failed"
-                    exit 1
-                fi
+  pull_image:
+    runs-on: ubuntu-latest
+    outputs:
+      health_check_result: ${{ steps.summary.outputs.github_output }}
+    steps:
+      - name: pull image
+        run: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest
 
-            - name: cleamup
-              if: always()
-              run: | 
-                docker rm health_check_container || true
+      - name: run container
+        run: |
+          docker rm -f health_check_container || true
+          docker run -d -p 5000:5000 --name health_check_container \
+            ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest
 
-            # ✅ reflect actual result
-            - name: summary step
-              id: summary
-              if: always()    # ← run even on failure so summary is always written
-              run: |
-                if [ "${{ job.status }}" == "success" ]; then
-                    STATUS="PASSED ✅"
-                else
-                    STATUS="FAILED ❌"
-                fi
-                echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
-                echo "- Image: ${{ secrets.docker_username }}/github-actions-capstone:latest" >> $GITHUB_STEP_SUMMARY
-                echo "- Status: $STATUS" >> $GITHUB_STEP_SUMMARY
-                echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
-                echo "github_output=$STATUS" >> $GITHUB_OUTPUT
+      - name: healthcheck after waiting 5 seconds
+        run: |
+          sleep 5
+          if curl -s http://localhost:5000/health; then
+            echo "Health check passed"
+          else
+            echo "Health check failed"
+            exit 1
+          fi
+
+      - name: cleanup
+        if: always()                   # ✅ always runs
+        run: |
+          docker rm -f health_check_container || true
+
+      - name: summary step
+        id: summary
+        if: always()                   # ✅ always runs
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            STATUS="PASSED ✅"
+          else
+            STATUS="FAILED ❌"
+          fi
+          echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Image: ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: $STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "github_output=$STATUS" >> $GITHUB_OUTPUT
