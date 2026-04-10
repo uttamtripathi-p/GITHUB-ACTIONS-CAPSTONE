@@ -13,11 +13,11 @@ jobs:
         steps:
             - name: pull image
               run: |
-                docker pull ${{ secrets.docker_username }}/github-actions-capstone:latest
+                docker pull ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest
             - name: run container
               run: |
                 docker rm -f health_check_container || true
-                docker run -d -p 5000:5000 --name health_check_container ${{ secrets.docker_username }}/github-actions-capstone:latest
+                docker run -d -p 5000:5000 --name health_check_container ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest
             - name: healthcheck after waiting 5 seconds
               run: |
                 sleep 5
@@ -29,16 +29,22 @@ jobs:
                 fi
 
             - name: cleamup
+              if: always()
               run: | 
                 docker rm health_check_container || true
 
+            # ✅ reflect actual result
             - name: summary step
               id: summary
+              if: always()    # ← run even on failure so summary is always written
               run: |
+                if [ "${{ job.status }}" == "success" ]; then
+                    STATUS="PASSED ✅"
+                else
+                    STATUS="FAILED ❌"
+                fi
                 echo "## Health Check Report" >> $GITHUB_STEP_SUMMARY
                 echo "- Image: ${{ secrets.docker_username }}/github-actions-capstone:latest" >> $GITHUB_STEP_SUMMARY
-                echo "- Status: PASSED" >> $GITHUB_STEP_SUMMARY
+                echo "- Status: $STATUS" >> $GITHUB_STEP_SUMMARY
                 echo "- Time: $(date)" >> $GITHUB_STEP_SUMMARY
-                github_output="Health check completed successfully at $(date)"
-                echo "github_output=$github_output" >> $GITHUB_OUTPUT
-                        
+                echo "github_output=$STATUS" >> $GITHUB_OUTPUT
