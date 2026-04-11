@@ -185,6 +185,19 @@ def delete_todo(id):
     conn.commit()
     return home()
 
+def init_db():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS todos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            task VARCHAR(255) NOT NULL
+        )
+    """)
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 if __name__ == '__main__':
+    init_db()
     app.run(host='0.0.0.0', port=5000)

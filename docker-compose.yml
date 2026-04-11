@@ -29,7 +29,7 @@ services:
     networks:
       - mynetwork 
     healthcheck:
-      test: ["CMD", "mysql", "--user=${MYSQL_USER}", "--password=${MYSQL_ROOT_PASSWORD}", "--silent", "--execute", "SELECT 1;"]
+      test: ["CMD", "mysql", "--user=${MYSQL_USER}", "--password=${MYSQL_PASSWORD}", "--silent", "--execute", "SELECT 1;"]
       interval: 10s
       timeout: 5s
       retries: 5
