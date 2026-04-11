@@ -28,17 +28,27 @@ jobs:
       docker_username: ${{ secrets.DOCKER_USERNAME }}
       docker_token: ${{ secrets.DOCKER_TOKEN }}
 
-  deploy: 
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: self-hosted        # runs on YOUR local machine
     needs: [build-push, prep]
     environment: environment
     steps:
-      - name: deploy message
-        run: |  
-          echo "Deploying image: ${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:${{ needs.prep.outputs.short_sha }}"
-      - name: environment info
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file from secrets
         run: |
-          echo "The environment being used is : ${{ vars.SITE }}"
-      - name: success message
-        if: success()
-        run: echo "SUCCESSFULL"
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+
+      - name: Deploy with docker-compose
+        run: |
+          docker-compose down
+          docker-compose up --build -d
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -sf http://localhost:8080/health || exit 1
