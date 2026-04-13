@@ -31,34 +31,36 @@ jobs:
   
 
   security-deploy:
-    runs-on: self-hosted        # runs on YOUR local machine
-    needs: [build-push, prep]
-    environment: environment
-    steps:
-      - name: Scan Docker Image for Vulnerabilities
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ secrets.docker_username }}/${{ steps.image.outputs.name }}:latest'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-    
-      - name: Checkout code
-        uses: actions/checkout@v4
+  runs-on: self-hosted
+  needs: [build-push, prep]
+  environment: environment
+  steps:
 
-      - name: Create .env file from secrets
-        run: |
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
-          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
-          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
-          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
 
-      - name: Deploy with docker-compose
-        run: |
-          docker-compose down
-          docker-compose up --build -d
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Health check
-        run: |
-          sleep 10
-          curl -sf http://localhost:8080/health || exit 1
+    - name: Scan Docker Image for Vulnerabilities
+      uses: aquasecurity/trivy-action@master
+      with:
+         image-ref: '${{ secrets.DOCKER_USERNAME }}/github-actions-capstone:latest'
+         format: 'table'
+         exit-code: '1'
+         severity: 'CRITICAL,HIGH'
+
+    - name: Create .env file from secrets
+      run: |
+        echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+        echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+        echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+        echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+
+     - name: Deploy with docker-compose
+       run: |
+        docker-compose down
+        docker-compose up --build -d
+
+     - name: Health check
+       run: |
+        sleep 10
+        curl -sf http://localhost:8080/health || exit 1
